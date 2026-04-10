@@ -124,7 +124,7 @@ describe('WebhookHandler.on() / dispatch()', () => {
     it('dispatches event to registered handler', async () => {
         const handler = makeHandler({ verifySignatures: false });
         const received: unknown[] = [];
-        handler.on('transaction.completed', (evt) => received.push(evt));
+        handler.on('transaction.completed', (evt) => { received.push(evt); });
 
         await handler.dispatch(mockWebhookEvent);
         expect(received).toHaveLength(1);
@@ -134,7 +134,7 @@ describe('WebhookHandler.on() / dispatch()', () => {
     it('dispatches to wildcard * handler', async () => {
         const handler = makeHandler({ verifySignatures: false });
         const received: string[] = [];
-        handler.on('*', (evt) => received.push(evt.type));
+        handler.on('*', (evt) => { received.push(evt.type); });
 
         await handler.dispatch(mockWebhookEvent);
         expect(received).toContain('transaction.completed');
@@ -144,8 +144,8 @@ describe('WebhookHandler.on() / dispatch()', () => {
         const handler = makeHandler({ verifySignatures: false });
         const specific: number[] = [];
         const wildcard: number[] = [];
-        handler.on('transaction.completed', () => specific.push(1));
-        handler.on('*', () => wildcard.push(1));
+        handler.on('transaction.completed', () => { specific.push(1); });
+        handler.on('*', () => { wildcard.push(1); });
 
         await handler.dispatch(mockWebhookEvent);
         expect(specific).toHaveLength(1);
@@ -155,7 +155,7 @@ describe('WebhookHandler.on() / dispatch()', () => {
     it('does NOT dispatch to mismatched event type', async () => {
         const handler = makeHandler({ verifySignatures: false });
         const received: unknown[] = [];
-        handler.on('loan.approved', (evt) => received.push(evt));
+        handler.on('loan.approved', (evt) => { received.push(evt); });
 
         await handler.dispatch(mockWebhookEvent); // type: transaction.completed
         expect(received).toHaveLength(0);
@@ -164,8 +164,8 @@ describe('WebhookHandler.on() / dispatch()', () => {
     it('supports multiple handlers for the same event type', async () => {
         const handler = makeHandler({ verifySignatures: false });
         let count = 0;
-        handler.on('transaction.completed', () => count++);
-        handler.on('transaction.completed', () => count++);
+        handler.on('transaction.completed', () => { count++; });
+        handler.on('transaction.completed', () => { count++; });
 
         await handler.dispatch(mockWebhookEvent);
         expect(count).toBe(2);
