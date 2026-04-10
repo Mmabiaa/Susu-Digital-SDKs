@@ -1,0 +1,350 @@
+Metadata-Version: 2.4
+Name: susudigital-python
+Version: 2.0.5
+Summary: Enterprise-Grade Python SDK for Susu Digital's microfinance platform
+Author-email: Susu Digital <sdk-support@susudigital.app>
+Project-URL: Homepage, https://developers.susudigital.app/python-sdk
+Project-URL: Documentation, https://developers.susudigital.app/python-sdk
+Project-URL: Repository, https://github.com/mmabiaa/Susu-digital-sdks
+Project-URL: Bug Tracker, https://github.com/mmabiaa/Susu-digital-sdks/issues
+Keywords: susudigital,microfinance,fintech,ghana,sdk,api
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Office/Business :: Financial
+Classifier: Typing :: Typed
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: httpx>=0.24.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: python-dateutil>=2.8.2
+Requires-Dist: typing-extensions>=4.5.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.11.0; extra == "dev"
+Requires-Dist: respx>=0.20.2; extra == "dev"
+Requires-Dist: mypy>=1.5.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Provides-Extra: django
+Requires-Dist: django>=3.2; extra == "django"
+Provides-Extra: async
+Requires-Dist: anyio>=3.7.0; extra == "async"
+
+# Susu Digital Python SDK
+
+> **Enterprise-Grade Python SDK for Susu Digital's Microfinance Platform**  
+> Full type hints · Async/await · Django/Flask/FastAPI ready · Production hardened
+
+[![PyPI version](https://badge.fury.io/py/susudigital-python.svg)](https://pypi.org/project/susudigital-python/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+---
+
+## Installation
+
+```bash
+pip install susudigital-python
+```
+
+```bash
+# Poetry
+poetry add susudigital-python
+```
+
+---
+
+## Quick Start
+
+```python
+from susudigital import SusuDigitalClient
+import os
+
+client = SusuDigitalClient(
+    api_key=os.environ["SUSU_API_KEY"],
+    environment="production",          # or "sandbox"
+    organization=os.environ.get("SUSU_ORGANIZATION_ID"),
+    timeout=30,
+    max_retries=3,
+)
+
+# ── Create a customer
+from susudigital.types import CustomerCreate, Address
+
+customer = client.customers.create(
+    CustomerCreate(
+        first_name="John",
+        last_name="Doe",
+        phone="+233XXXXXXXXX",
+        email="john.doe@example.com",
+        address=Address(
+            street="123 Main Street",
+            city="Accra",
+            region="Greater Accra",
+            country="Ghana",
+        ),
+    )
+)
+
+print(customer.id)           # cust_abc123
+print(customer.full_name)    # John Doe
+
+# ── Deposit
+from susudigital.types import DepositRequest
+from decimal import Decimal
+import time
+
+deposit = client.transactions.deposit(
+    DepositRequest(
+        customer_id=customer.id,
+        amount=Decimal("100.00"),
+        currency="GHS",
+        reference=f"DEP-{int(time.time())}",
+    )
+)
+
+# ── Get balance
+balance = client.customers.get_balance(customer.id)
+print(balance.available)
+
+# ── Close
+client.close()
+```
+
+---
+
+## Async Support
+
+```python
+import asyncio
+from susudigital import AsyncSusuDigitalClient
+
+async def main():
+    async with AsyncSusuDigitalClient(
+        api_key="sk_live_...",
+        environment="production",
+    ) as client:
+        # Concurrent calls
+        customer, transactions, loans = await asyncio.gather(
+            client.customers.get("cust_123"),
+            client.transactions.list(customer_id="cust_123"),
+            client.loans.list(customer_id="cust_123"),
+        )
+
+asyncio.run(main())
+```
+
+---
+
+## Error Handling
+
+```python
+from susudigital.exceptions import (
+    SusuDigitalError,
+    ValidationError,
+    AuthenticationError,
+    RateLimitError,
+    NetworkError,
+    NotFoundError,
+)
+
+try:
+    customer = client.customers.create(data)
+except ValidationError as e:
+    print(f"Validation failed: {e.field_errors}")
+except AuthenticationError:
+    print("Invalid API key")
+except RateLimitError as e:
+    import time
+    time.sleep(e.retry_after)
+except NetworkError as e:
+    print(f"Network error: {e.message}")
+except NotFoundError:
+    print("Resource not found")
+except SusuDigitalError as e:
+    print(f"SDK error [{e.code}]: {e.message}")
+```
+
+---
+
+## Webhooks
+
+```python
+from susudigital import WebhookHandler
+
+handler = WebhookHandler(
+    secret=os.environ["SUSU_WEBHOOK_SECRET"],
+    verify_signatures=True,   # always True in production
+    tolerance=300,            # reject events older than 5 minutes
+)
+
+# Flask example
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/webhooks/susu", methods=["POST"])
+def handle_webhook():
+    try:
+        event = handler.construct_event(
+            payload=request.data,
+            signature=request.headers.get("Susu-Signature"),
+        )
+        if event.type == "transaction.completed":
+            print(f"Transaction {event.data['transaction']['id']} completed")
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+```
+
+---
+
+## Loan Management
+
+```python
+from susudigital.types import LoanApplicationRequest, Collateral, CollateralType, Guarantor
+
+application = client.loans.create_application(
+    LoanApplicationRequest(
+        customer_id="cust_123",
+        amount=Decimal("5000.00"),
+        currency="GHS",
+        purpose="business_expansion",
+        term=12,
+        interest_rate=Decimal("15.0"),
+        collateral=Collateral(
+            type=CollateralType.PROPERTY,
+            description="Residential property in Accra",
+            value=Decimal("50000.00"),
+        ),
+        guarantors=[
+            Guarantor(name="Jane Guarantor", phone="+233XXXXXXXXX", relationship="spouse")
+        ],
+    )
+)
+
+# Approve
+approved = client.loans.approve(
+    application.id,
+    {"approved_amount": 4500, "approved_term": 12, "approved_rate": "14.0", "conditions": []},
+)
+
+# Get schedule
+schedule = client.loans.get_schedule(approved.id)
+for item in schedule:
+    print(f"Instalment {item.installment_number}: {item.total} GHS due {item.due_date}")
+```
+
+---
+
+## Batch Operations
+
+```python
+from susudigital.batch import BatchProcessor
+
+processor = BatchProcessor(client, batch_size=100)
+
+results = processor.customers.create_batch([
+    {"first_name": "Alice", "last_name": "A", "phone": "+233244000001"},
+    {"first_name": "Bob",   "last_name": "B", "phone": "+233244000002"},
+])
+
+for result in results:
+    if result.success:
+        print(f"Created: {result.data.id}")
+    else:
+        print(f"Failed: {result.error}")
+```
+
+---
+
+## Django Integration
+
+```python
+# settings.py
+SUSU_DIGITAL = {
+    "API_KEY":        os.environ["SUSU_API_KEY"],
+    "ENVIRONMENT":    os.environ.get("SUSU_ENVIRONMENT", "sandbox"),
+    "ORGANIZATION":   os.environ.get("SUSU_ORGANIZATION_ID"),
+    "WEBHOOK_SECRET": os.environ.get("SUSU_WEBHOOK_SECRET"),
+    "TIMEOUT":        30,
+    "MAX_RETRIES":    3,
+}
+
+INSTALLED_APPS = [
+    # ...
+    "susudigital.contrib.django",
+]
+```
+
+```python
+# services.py
+from susudigital.contrib.django import DjangoSusuService
+
+class CustomerService(DjangoSusuService):
+    def create_from_user(self, user):
+        return self.client.customers.create({
+            "first_name": user.first_name,
+            "last_name":  user.last_name,
+            "email":      user.email,
+            "phone":      user.profile.phone,
+        })
+```
+
+---
+
+## Running Tests
+
+```bash
+cd python/
+pip install -e ".[dev]"
+pytest
+```
+
+---
+
+## Package Structure
+
+```
+python/
+├── src/susudigital/
+│   ├── __init__.py          # Public API
+│   ├── _version.py
+│   ├── client.py            # SusuDigitalClient (sync)
+│   ├── async_client.py      # AsyncSusuDigitalClient
+│   ├── _http.py             # HttpClient / AsyncHttpClient
+│   ├── services.py          # Sync service classes
+│   ├── async_services.py    # Async service classes
+│   ├── types.py             # Pydantic models
+│   ├── exceptions.py        # Exception hierarchy
+│   ├── webhooks.py          # WebhookHandler
+│   ├── batch.py             # BatchProcessor
+│   ├── py.typed             # PEP 561 marker
+│   └── contrib/
+│       └── django/          # Django helpers
+└── tests/
+    ├── conftest.py
+    ├── test_client.py
+    ├── test_async_client.py
+    ├── test_services.py
+    ├── test_http.py
+    ├── test_types.py
+    ├── test_exceptions.py
+    ├── test_webhooks.py
+    └── test_batch.py
+```
+
+---
+
+**© 2026 Susu Digital. All rights reserved.**  
+*SDK Version: 2.0.5 · Python 3.8+*
