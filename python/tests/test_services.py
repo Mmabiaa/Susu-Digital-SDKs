@@ -225,7 +225,7 @@ class TestLoanService:
         )
         loan = svc.create_application(req)
         assert isinstance(loan, Loan)
-        assert loan.status.value == "pending"
+        assert loan.status == "pending"
 
     def test_get_schedule(self, svc, http):
         http.get.return_value = {
