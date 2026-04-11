@@ -1,0 +1,59 @@
+
+.env
+.DS_Store
+.vscode
+.idea
+vendor/
+# Dependencies
+vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Composer files (optional — usually keep composer.lock)
+composer.phar
+
+# Logs
+*.log
+
+# Cache
+cache/
+tmp/
+temp/
+
+# PHPUnit
+.phpunit.result.cache
+
+# Coverage reports
+coverage/
+
+# Node modules (if frontend tooling exists)
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Laravel (if applicable)
+bootstrap/cache/*.php
+storage/*.key
+storage/logs/
+storage/framework/
+
+# Symfony (if applicable)
+var/cache/
+var/log/
+
+# Mac system files
+.AppleDouble
+.LSOverride
