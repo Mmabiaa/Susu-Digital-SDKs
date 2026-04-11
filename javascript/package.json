@@ -18,15 +18,15 @@
         "LICENSE"
     ],
     "scripts": {
-        "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.types.json",
-        "build:watch": "tsc -p tsconfig.esm.json --watch",
-        "test": "jest",
-        "test:watch": "jest --watch",
-        "test:coverage": "jest --coverage",
-        "lint": "eslint src --ext .ts",
-        "lint:fix": "eslint src --ext .ts --fix",
-        "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
-        "typecheck": "tsc --noEmit",
+        "build": "npx tsc -p tsconfig.cjs.json && npx tsc -p tsconfig.esm.json && npx tsc -p tsconfig.types.json",
+        "build:watch": "npx tsc -p tsconfig.esm.json --watch",
+        "test": "npx jest",
+        "test:watch": "npx jest --watch",
+        "test:coverage": "npx jest --coverage",
+        "lint": "npx eslint src --ext .ts",
+        "lint:fix": "npx eslint src --ext .ts --fix",
+        "format": "npx prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+        "typecheck": "npx tsc --noEmit",
         "prepublishOnly": "npm run build && npm test"
     },
     "keywords": [
