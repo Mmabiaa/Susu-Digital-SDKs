@@ -24,7 +24,11 @@ final class Loan extends BaseModel
 
     protected function hydrate(array $data): void
     {
-        parent::hydrate($data);
+        // Strip nested object keys; let this method handle them manually
+        // so parent::hydrate() doesn't attempt to assign a raw array to
+        // a typed property (e.g. ?Collateral).
+        $scalar = array_diff_key($data, array_flip(['collateral', 'guarantors']));
+        parent::hydrate($scalar);
 
         if (isset($data['collateral']) && is_array($data['collateral'])) {
             $this->collateral = new Collateral($data['collateral']);

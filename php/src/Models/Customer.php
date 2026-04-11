@@ -27,7 +27,8 @@ final class Customer extends BaseModel
 
     protected function hydrate(array $data): void
     {
-        parent::hydrate($data);
+        $scalar = array_diff_key($data, array_flip(['address', 'identification']));
+        parent::hydrate($scalar);
 
         if (isset($data['address']) && is_array($data['address'])) {
             $this->address = new Address($data['address']);
