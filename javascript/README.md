@@ -1,4 +1,4 @@
-# @susudigital/sdk
+# Susu Digital JavaScript/TypeScript SDK
 
 > **Enterprise-Grade JavaScript / TypeScript SDK for the Susu Digital microfinance platform.**
 
