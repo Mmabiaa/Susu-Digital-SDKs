@@ -48,3 +48,39 @@ if err != nil {
 }
 fmt.Printf("Received event type: %s\n", event.Type)
 ```
+
+## Testing
+
+```sh
+go test ./... -v
+```
+
+## File Structure
+
+go/
+├── go.mod
+├── README.md
+├── susudigital/       # Equivalent to Python/PHP's `src` directories
+│   ├── analytics.go
+│   ├── batch.go
+│   ├── client.go
+│   ├── config.go
+│   ├── customers.go
+│   ├── errors.go
+│   ├── http_client.go
+│   ├── loans.go
+│   ├── models.go
+│   ├── savings.go
+│   ├── transactions.go
+│   └── webhooks.go
+└── tests/             # Tests accurately decoupled from source
+    ├── analytics_test.go
+    ├── batch_test.go
+    ├── client_test.go
+    ├── customers_test.go
+    ├── http_client_test.go
+    ├── loans_test.go
+    ├── savings_test.go
+    ├── transactions_test.go
+    └── webhooks_test.go
+

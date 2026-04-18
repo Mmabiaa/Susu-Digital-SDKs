@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestTransactionService_Create(t *testing.T) {
@@ -15,8 +17,8 @@ func TestTransactionService_Create(t *testing.T) {
 		}
 		
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(Transaction{
-			BaseModel:  BaseModel{ID: "txn-123"},
+		json.NewEncoder(w).Encode(susu.Transaction{
+			BaseModel:  susu.BaseModel{ID: "txn-123"},
 			CustomerID: "cust-1",
 			Amount:     100.0,
 			Type:       "deposit",
@@ -24,11 +26,11 @@ func TestTransactionService_Create(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
-	client := NewClient(cfg)
+	client := susu.NewClient(cfg)
 
-	txn, err := client.Transactions.Create(context.Background(), &TransactionCreateParams{
+	txn, err := client.Transactions.Create(context.Background(), &susu.TransactionCreateParams{
 		CustomerID: "cust-1",
 		Amount:     100.0,
 		Type:       "deposit",

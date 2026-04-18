@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -6,21 +6,23 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestSavingsService_Create(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(SavingsAccount{
-			BaseModel: BaseModel{ID: "sav-123"},
+		json.NewEncoder(w).Encode(susu.SavingsAccount{
+			BaseModel: susu.BaseModel{ID: "sav-123"},
 			Balance:   0.0,
 		})
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
-	client := NewClient(cfg)
+	client := susu.NewClient(cfg)
 
 	sav, err := client.Savings.Create(context.Background(), "cust-1")
 	if err != nil {

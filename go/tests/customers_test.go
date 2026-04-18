@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestCustomerService_Create(t *testing.T) {
@@ -17,15 +19,15 @@ func TestCustomerService_Create(t *testing.T) {
 			t.Errorf("Expected /customers, got %s", r.URL.Path)
 		}
 		
-		var params CustomerCreateParams
+		var params susu.CustomerCreateParams
 		json.NewDecoder(r.Body).Decode(&params)
 		if params.FirstName != "Alice" {
 			t.Errorf("Expected Alice, got %s", params.FirstName)
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(Customer{
-			BaseModel: BaseModel{ID: "cust-123"},
+		json.NewEncoder(w).Encode(susu.Customer{
+			BaseModel: susu.BaseModel{ID: "cust-123"},
 			FirstName: "Alice",
 			LastName:  "Smith",
 			Status:    "active",
@@ -33,11 +35,11 @@ func TestCustomerService_Create(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
-	client := NewClient(cfg)
+	client := susu.NewClient(cfg)
 
-	customer, err := client.Customers.Create(context.Background(), &CustomerCreateParams{
+	customer, err := client.Customers.Create(context.Background(), &susu.CustomerCreateParams{
 		FirstName: "Alice",
 		LastName:  "Smith",
 	})

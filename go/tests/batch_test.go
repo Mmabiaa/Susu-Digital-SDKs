@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -6,24 +6,26 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestBatchProcessor_CreateTransactions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode([]Transaction{
-			{BaseModel: BaseModel{ID: "txn-1"}},
-			{BaseModel: BaseModel{ID: "txn-2"}},
+		json.NewEncoder(w).Encode([]susu.Transaction{
+			{BaseModel: susu.BaseModel{ID: "txn-1"}},
+			{BaseModel: susu.BaseModel{ID: "txn-2"}},
 		})
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
-	client := NewClient(cfg)
-	bp := NewBatchProcessor(client)
+	client := susu.NewClient(cfg)
+	bp := susu.NewBatchProcessor(client)
 
-	items := []TransactionCreateParams{
+	items := []susu.TransactionCreateParams{
 		{Amount: 10},
 		{Amount: 20},
 	}

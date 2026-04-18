@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestHTTPClient_Retries(t *testing.T) {
@@ -18,18 +20,18 @@ func TestHTTPClient_Retries(t *testing.T) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		json.NewEncoder(w).Encode(susu.AnalyticsReport{TotalCustomers: 5})
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
 	cfg.MaxRetries = 3
 	cfg.Timeout = 1 * time.Second
 
-	client := NewClient(cfg)
-	var result map[string]string
-	err := client.http.get(context.Background(), "/test", &result)
+	client := susu.NewClient(cfg)
+	// Trigger HTTP request via public API
+	report, err := client.Analytics.GetSummary(context.Background())
 
 	if err != nil {
 		t.Fatalf("Expected successful request after retries, got error: %v", err)
@@ -37,15 +39,15 @@ func TestHTTPClient_Retries(t *testing.T) {
 	if requests != 3 {
 		t.Errorf("Expected 3 requests, got %d", requests)
 	}
-	if result["status"] != "ok" {
-		t.Errorf("Expected status ok, got %v", result["status"])
+	if report.TotalCustomers != 5 {
+		t.Errorf("Expected 5 customers, got %v", report.TotalCustomers)
 	}
 }
 
 func TestHTTPClient_ErrorParsing(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(APIError{
+		json.NewEncoder(w).Encode(susu.APIError{
 			Code:      "invalid_request",
 			Message:   "Bad parameters",
 			RequestID: "req-123",
@@ -53,18 +55,18 @@ func TestHTTPClient_ErrorParsing(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
 	cfg.MaxRetries = 0
 
-	client := NewClient(cfg)
-	err := client.http.get(context.Background(), "/test", nil)
+	client := susu.NewClient(cfg)
+	_, err := client.Analytics.GetSummary(context.Background())
 
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 	
-	apiErr, ok := err.(*APIError)
+	apiErr, ok := err.(*susu.APIError)
 	if !ok {
 		t.Fatalf("Expected *APIError, got %T", err)
 	}

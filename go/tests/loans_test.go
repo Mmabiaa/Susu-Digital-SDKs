@@ -1,4 +1,4 @@
-package susudigital
+package tests
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestLoanService_CreateApplication(t *testing.T) {
@@ -15,18 +17,18 @@ func TestLoanService_CreateApplication(t *testing.T) {
 		}
 		
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(Loan{
-			BaseModel: BaseModel{ID: "loan-123"},
+		json.NewEncoder(w).Encode(susu.Loan{
+			BaseModel: susu.BaseModel{ID: "loan-123"},
 			Status:    "pending",
 		})
 	}))
 	defer server.Close()
 
-	cfg := DefaultConfig("test-key")
+	cfg := susu.DefaultConfig("test-key")
 	cfg.BaseURL = server.URL
-	client := NewClient(cfg)
+	client := susu.NewClient(cfg)
 
-	loan, err := client.Loans.CreateApplication(context.Background(), &LoanApplicationParams{
+	loan, err := client.Loans.CreateApplication(context.Background(), &susu.LoanApplicationParams{
 		CustomerID: "cust-1",
 		Amount:     500.0,
 		Duration:   12,

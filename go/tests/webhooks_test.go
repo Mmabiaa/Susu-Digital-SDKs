@@ -1,10 +1,12 @@
-package susudigital
+package tests
 
 import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"testing"
+
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
 )
 
 func TestWebhookHandler_ConstructEvent(t *testing.T) {
@@ -15,7 +17,7 @@ func TestWebhookHandler_ConstructEvent(t *testing.T) {
 	mac.Write(payload)
 	signature := hex.EncodeToString(mac.Sum(nil))
 
-	handler := NewWebhookHandler(secret)
+	handler := susu.NewWebhookHandler(secret)
 	event, err := handler.ConstructEvent(payload, signature)
 	
 	if err != nil {
@@ -30,7 +32,7 @@ func TestWebhookHandler_ConstructEvent(t *testing.T) {
 }
 
 func TestWebhookHandler_InvalidSignature(t *testing.T) {
-	handler := NewWebhookHandler("whsec_test_secret")
+	handler := susu.NewWebhookHandler("whsec_test_secret")
 	_, err := handler.ConstructEvent([]byte(`{}`), "invalid_sig")
 	if err == nil {
 		t.Fatal("Expected error for invalid signature")

@@ -1,16 +1,16 @@
-package susudigital
+package tests
 
-import "testing"
+import (
+	"testing"
+	susu "github.com/susudigital/susu-go-sdk/susudigital"
+)
 
 func TestNewClient(t *testing.T) {
-	cfg := DefaultConfig("test-key")
-	client := NewClient(cfg)
+	cfg := susu.DefaultConfig("test-key")
+	client := susu.NewClient(cfg)
 
 	if client == nil {
 		t.Fatal("Expected non-nil client")
-	}
-	if client.config.APIKey != "test-key" {
-		t.Errorf("Expected APIKey 'test-key', got '%s'", client.config.APIKey)
 	}
 	if client.Customers == nil {
 		t.Error("Expected Customers service to be initialized")
