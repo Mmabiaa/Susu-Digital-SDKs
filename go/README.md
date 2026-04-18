@@ -5,7 +5,7 @@ The official Go SDK for the Susu Digital API.
 ## Installation
 
 ```sh
-go get github.com/susudigital/susu-go-sdk
+go get github.com/mmabiaa/susudigital-sdk
 ```
 
 ## Usage

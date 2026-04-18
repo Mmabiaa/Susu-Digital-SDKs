@@ -6,6 +6,7 @@ import "time"
 type Config struct {
 	APIKey        string
 	Environment   string             // "sandbox" or "production"
+	BaseURL       string             // Override the base URL for testing
 	Organization  string             // Optional organization ID
 	Timeout       time.Duration      // HTTP timeout. Default is 30s.
 	MaxRetries    int                // Maximum retries. Default is 3.

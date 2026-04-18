@@ -26,9 +26,14 @@ func newHTTPClient(cfg *Config) *httpClient {
 }
 
 func (hc *httpClient) do(ctx context.Context, method, path string, body, result any) error {
-	baseURL := "https://api.sandbox.susudigital.app/v1"
-	if hc.config.Environment == "production" {
-		baseURL = "https://api.susudigital.app/v1"
+	var baseURL string
+	if hc.config.BaseURL != "" {
+		baseURL = hc.config.BaseURL
+	} else {
+		baseURL = "https://api.sandbox.susudigital.app/v1"
+		if hc.config.Environment == "production" {
+			baseURL = "https://api.susudigital.app/v1"
+		}
 	}
 	u := baseURL + path
 
