@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	susu "github.com/susudigital/susu-go-sdk/susudigital"
+	susu "github.com/mmabiaa/susudigital-sdk/susudigital"
 )
 
 func TestWebhookHandler_ConstructEvent(t *testing.T) {

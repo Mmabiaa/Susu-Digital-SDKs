@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	susu "github.com/susudigital/susu-go-sdk/susudigital"
+	susu "github.com/mmabiaa/susudigital-sdk/susudigital"
 )
 
 func TestAnalyticsService_GetSummary(t *testing.T) {

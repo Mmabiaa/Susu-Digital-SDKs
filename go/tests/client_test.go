@@ -2,7 +2,7 @@ package tests
 
 import (
 	"testing"
-	susu "github.com/susudigital/susu-go-sdk/susudigital"
+	susu "github.com/mmabiaa/susudigital-sdk/susudigital"
 )
 
 func TestNewClient(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	susu "github.com/susudigital/susu-go-sdk/susudigital"
+	susu "github.com/mmabiaa/susudigital-sdk/susudigital"
 )
 
 func TestHTTPClient_Retries(t *testing.T) {
